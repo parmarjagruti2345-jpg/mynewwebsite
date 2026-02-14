@@ -1,73 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>My Pro Website</title>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JeevanSetu AI - Smart Life Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
 body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:linear-gradient(135deg,#667eea,#764ba2);
-    color:white;
-    text-align:center;
+background:linear-gradient(135deg,#1e3c72,#2a5298);
+color:white;
+transition:0.4s;
 }
 
-.navbar{
-    background:rgba(0,0,0,0.4);
-    padding:15px;
-    font-size:20px;
+.dark{
+background:#111;
 }
 
-.hero{
-    padding:100px 20px;
+header{
+display:flex;
+justify-content:space-between;
+padding:20px 8%;
+background:rgba(0,0,0,0.3);
 }
+
+.logo{font-size:22px;font-weight:700;}
 
 button{
-    padding:12px 25px;
-    border:none;
-    background:white;
-    color:#764ba2;
-    font-size:18px;
-    border-radius:25px;
-    cursor:pointer;
-    transition:0.3s;
+padding:10px 20px;
+border:none;
+border-radius:20px;
+cursor:pointer;
+font-weight:600;
 }
 
-button:hover{
-    background:black;
-    color:white;
+.primary{
+background:#ffd369;
+color:black;
 }
 
-.footer{
-    background:rgba(0,0,0,0.4);
-    padding:15px;
-    position:fixed;
-    bottom:0;
-    width:100%;
+section{
+padding:50px 8%;
+}
+
+.card{
+background:rgba(255,255,255,0.1);
+padding:25px;
+border-radius:15px;
+margin-bottom:25px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:10px 0;
+border-radius:8px;
+border:none;
+}
+
+.progress-bar{
+background:#ddd;
+border-radius:20px;
+overflow:hidden;
+margin-top:10px;
+}
+
+.progress{
+height:15px;
+width:0%;
+background:#ffd369;
+transition:0.5s;
+}
+
+footer{
+text-align:center;
+padding:20px;
+background:rgba(0,0,0,0.3);
 }
 </style>
-
 </head>
+
 <body>
 
-<div class="navbar">
-🚀 My Pro Website
+<header>
+<div class="logo">🌉 JeevanSetu AI</div>
+<div>
+<button onclick="toggleDark()">Dark Mode</button>
 </div>
+</header>
 
-<div class="hero">
-<h1>Welcome to My Professional Website</h1>
-<p>I created this using GitHub Pages</p>
-<button onclick="showMessage()">Click Me</button>
+<section id="auth">
+<h2>Login / Signup</h2>
+<div class="card">
+<input type="text" id="username" placeholder="Enter Username">
+<button class="primary" onclick="login()">Login</button>
+<p id="welcome"></p>
 </div>
+</section>
 
-<div class="footer">
-© 2026 My Website | All Rights Reserved
+<section>
+<h2>📅 Study Planner</h2>
+<div class="card">
+<input type="text" id="subject" placeholder="Subject">
+<input type="date" id="examDate">
+<button class="primary" onclick="generatePlan()">Generate Plan</button>
+<p id="studyResult"></p>
 </div>
+</section>
+
+<section>
+<h2>💰 Expense Tracker</h2>
+<div class="card">
+<input type="number" id="income" placeholder="Income">
+<input type="number" id="expense" placeholder="Expense">
+<button class="primary" onclick="calculateSaving()">Calculate</button>
+<p id="expenseResult"></p>
+</div>
+</section>
+
+<section>
+<h2>🎯 Goal Tracker</h2>
+<div class="card">
+<input type="text" id="goal" placeholder="Enter Goal">
+<button class="primary" onclick="setGoal()">Set Goal</button>
+<div class="progress-bar">
+<div class="progress" id="progress"></div>
+</div>
+<p id="goalResult"></p>
+</div>
+</section>
+
+<footer>
+© 2026 JeevanSetu AI | National Level Project 🚀
+</footer>
 
 <script>
-function showMessage(){
-    alert("Welcome to Pro Level Website 🔥");
+function toggleDark(){
+document.body.classList.toggle("dark");
+}
+
+function login(){
+let username = document.getElementById("username").value;
+localStorage.setItem("user",username);
+document.getElementById("welcome").innerHTML="Welcome "+username+" 👋";
+}
+
+window.onload=function(){
+let savedUser=localStorage.getItem("user");
+if(savedUser){
+document.getElementById("welcome").innerHTML="Welcome Back "+savedUser+" 👋";
+}
+}
+
+function generatePlan(){
+let subject=document.getElementById("subject").value;
+let exam=new Date(document.getElementById("examDate").value);
+let today=new Date();
+let days=Math.ceil((exam-today)/(1000*60*60*24));
+
+if(days>0){
+document.getElementById("studyResult").innerHTML=
+"You have "+days+" days for "+subject+". Study consistently daily.";
+}else{
+document.getElementById("studyResult").innerHTML="Select valid future date.";
+}
+}
+
+function calculateSaving(){
+let income=document.getElementById("income").value;
+let expense=document.getElementById("expense").value;
+let saving=income-expense;
+
+if(saving>0){
+document.getElementById("expenseResult").innerHTML=
+"You can save ₹"+saving+" this month.";
+}else{
+document.getElementById("expenseResult").innerHTML=
+"You are overspending!";
+}
+}
+
+function setGoal(){
+let goal=document.getElementById("goal").value;
+document.getElementById("goalResult").innerHTML=
+"Goal Set: "+goal+" 🎯";
+
+let progress=document.getElementById("progress");
+let width=0;
+let interval=setInterval(()=>{
+if(width>=100){
+clearInterval(interval);
+}else{
+width+=10;
+progress.style.width=width+"%";
+}
+},300);
 }
 </script>
 
