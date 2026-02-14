@@ -1,185 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
+<title>My Pro Website</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JeevanSetu AI</title>
 
 <style>
 body{
     margin:0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg,#eef2ff,#ffffff);
-}
-
-/* NAVBAR */
-nav{
-    background:#4f46e5;
+    font-family:Arial, sans-serif;
+    background:linear-gradient(135deg,#667eea,#764ba2);
     color:white;
-    padding:15px 40px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-nav h2{
-    margin:0;
-}
-nav a{
-    color:white;
-    text-decoration:none;
-    margin-left:20px;
-}
-
-/* HERO */
-.hero{
     text-align:center;
-    padding:70px 20px;
 }
-.hero h1{
-    font-size:45px;
-    color:#4f46e5;
+
+.navbar{
+    background:rgba(0,0,0,0.4);
+    padding:15px;
+    font-size:20px;
 }
-.hero p{
-    max-width:600px;
-    margin:auto;
-    font-size:18px;
+
+.hero{
+    padding:100px 20px;
 }
-.hero button{
+
+button{
     padding:12px 25px;
-    margin-top:20px;
     border:none;
-    background:#f43f5e;
-    color:white;
+    background:white;
+    color:#764ba2;
+    font-size:18px;
     border-radius:25px;
     cursor:pointer;
+    transition:0.3s;
 }
 
-/* SECTION */
-.section{
-    padding:50px 20px;
-    text-align:center;
-}
-.cards{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-}
-.card{
-    background:white;
-    width:280px;
-    margin:15px;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.1);
-}
-input{
-    padding:8px;
-    margin:5px;
-    width:80%;
-}
-button.small{
-    padding:8px 15px;
-    margin-top:10px;
-    background:#4f46e5;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-footer{
-    text-align:center;
-    padding:20px;
-    background:#4f46e5;
+button:hover{
+    background:black;
     color:white;
 }
 
-/* Responsive */
-@media(max-width:768px){
-    .cards{
-        flex-direction:column;
-        align-items:center;
-    }
+.footer{
+    background:rgba(0,0,0,0.4);
+    padding:15px;
+    position:fixed;
+    bottom:0;
+    width:100%;
 }
 </style>
-</head>
 
+</head>
 <body>
 
-<nav>
-<h2>JeevanSetu AI 💡</h2>
-<div>
-<a href="#">Home</a>
-<a href="#features">Features</a>
-</div>
-</nav>
-
-<section class="hero">
-<h1>Your Smart Life Bridge</h1>
-<p>AI-powered platform to manage study, money, stress and goals in simple way.</p>
-<button onclick="alert('AI Feature Coming Soon!')">Try Now</button>
-</section>
-
-<section id="features" class="section">
-<h2>Smart Features 🚀</h2>
-
-<div class="cards">
-
-<div class="card">
-<h3>📚 Study Planner</h3>
-<input type="text" id="examDate" placeholder="Enter Exam Date">
-<br>
-<button class="small" onclick="studyPlan()">Generate Plan</button>
-<p id="studyResult"></p>
+<div class="navbar">
+🚀 My Pro Website
 </div>
 
-<div class="card">
-<h3>💰 Expense Helper</h3>
-<input type="number" id="income" placeholder="Monthly Income">
-<input type="number" id="expense" placeholder="Monthly Expense">
-<br>
-<button class="small" onclick="calculateSaving()">Check Saving</button>
-<p id="savingResult"></p>
+<div class="hero">
+<h1>Welcome to My Professional Website</h1>
+<p>I created this using GitHub Pages</p>
+<button onclick="showMessage()">Click Me</button>
 </div>
 
-<div class="card">
-<h3>🧠 Stress Relief</h3>
-<button class="small" onclick="stressTip()">Get Tip</button>
-<p id="stressResult"></p>
+<div class="footer">
+© 2026 My Website | All Rights Reserved
 </div>
-
-</div>
-</section>
-
-<footer>
-© 2026 JeevanSetu AI | Designed with 💙
-</footer>
 
 <script>
-function studyPlan(){
-    var date=document.getElementById("examDate").value;
-    if(date==""){
-        document.getElementById("studyResult").innerHTML="Please enter exam date.";
-    }else{
-        document.getElementById("studyResult").innerHTML="Study 2-3 hours daily till "+date+" 📚";
-    }
-}
-
-function calculateSaving(){
-    var income=parseFloat(document.getElementById("income").value);
-    var expense=parseFloat(document.getElementById("expense").value);
-    if(isNaN(income)||isNaN(expense)){
-        document.getElementById("savingResult").innerHTML="Enter valid numbers.";
-    }else{
-        var saving=income-expense;
-        document.getElementById("savingResult").innerHTML="Your Saving: ₹"+saving;
-    }
-}
-
-function stressTip(){
-    var tips=["Take 5 min deep breathing 🌿","Listen to calm music 🎵","Go for short walk 🚶","Write your thoughts ✍"];
-    var random=tips[Math.floor(Math.random()*tips.length)];
-    document.getElementById("stressResult").innerHTML=random;
+function showMessage(){
+    alert("Welcome to Pro Level Website 🔥");
 }
 </script>
 
