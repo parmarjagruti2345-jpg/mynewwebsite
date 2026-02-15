@@ -5,43 +5,100 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Pro Toolkit</title>
 
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 body{
 margin:0;
-font-family:Segoe UI;
-background:linear-gradient(135deg,#6d28d9,#ec4899);
+font-family:Segoe UI, sans-serif;
+background:linear-gradient(135deg,#4f46e5,#ec4899);
 color:white;
-text-align:center;
 }
 
+/* HEADER */
 .header{
-padding:15px;
-font-size:22px;
+padding:20px;
+font-size:24px;
 font-weight:bold;
+text-align:center;
 background:rgba(0,0,0,0.2);
+}
+
+/* SECTION */
+.section{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+padding:20px;
 }
 
 .card{
 background:white;
 color:black;
-max-width:500px;
-margin:40px auto;
-padding:25px;
+width:95%;
+max-width:1000px;
+padding:30px;
 border-radius:20px;
-box-shadow:0 10px 25px rgba(0,0,0,0.3);
+box-shadow:0 20px 40px rgba(0,0,0,0.3);
+text-align:center;
+}
+
+input, textarea{
+padding:10px;
+width:80%;
+max-width:500px;
+border-radius:10px;
+border:1px solid #ccc;
+margin:10px;
 }
 
 button{
-padding:8px 18px;
+padding:10px 20px;
 border:none;
 border-radius:20px;
-margin:8px;
-background:linear-gradient(45deg,#6d28d9,#ec4899);
+background:linear-gradient(45deg,#4f46e5,#ec4899);
 color:white;
 cursor:pointer;
+margin:10px;
+font-size:14px;
+transition:0.3s;
 }
 
-.hidden{display:none;}
+button:hover{
+transform:scale(1.05);
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:20px;
+margin-top:20px;
+}
+
+.tool{
+background:#f3f4f6;
+padding:20px;
+border-radius:15px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.tool:hover{
+background:#ddd6fe;
+transform:scale(1.05);
+}
+
+.hidden{
+display:none;
+}
+
+canvas{
+max-width:100%;
+margin-top:20px;
+}
 </style>
 </head>
 
@@ -50,59 +107,165 @@ cursor:pointer;
 <div class="header">🎓 Student Pro Toolkit</div>
 
 <!-- USERNAME PAGE -->
-<div class="card" id="usernamePage">
+<div class="section" id="page1">
+<div class="card">
 <h2>Enter Your Name</h2>
-<input type="text" id="usernameInput" placeholder="Type your name">
+<input type="text" id="username" placeholder="Type your name">
 <br>
-<button onclick="enterApp()">Enter</button>
-<p id="errorMsg" style="color:red;"></p>
+<button onclick="goNext()">Enter</button>
+<p id="msg" style="color:red;"></p>
+</div>
 </div>
 
-<!-- DASHBOARD PAGE -->
-<div class="card hidden" id="dashboard">
-<h2 id="welcomeText"></h2>
-<button onclick="logout()">Logout</button>
-<br><br>
-
+<!-- DASHBOARD -->
+<div class="section hidden" id="page2">
+<div class="card">
+<h2 id="welcome"></h2>
 <h3>Select Tool</h3>
-<button onclick="alert('Resize Tool Open')">📏 Resize</button>
-<button onclick="alert('Background Tool Open')">🎨 Background Remove</button>
 
+<div class="grid">
+<div class="tool" onclick="openTool('resize')">📏 Resize / Compress</div>
+<div class="tool" onclick="openTool('textpdf')">📝 Text to PDF</div>
+<div class="tool" onclick="openTool('imagepdf')">🖼 Image to PDF</div>
+</div>
+
+<br>
+<button onclick="logout()">Logout</button>
+</div>
+</div>
+
+<!-- TOOL PAGE -->
+<div class="section hidden" id="toolPage">
+<div class="card">
+<h2 id="toolTitle"></h2>
+
+<!-- RESIZE TOOL -->
+<div id="resizeTool" class="hidden">
+<input type="file" id="imageInput">
+<br>
+<button onclick="resizeImage()">Compress 50%</button>
+<canvas id="canvas"></canvas>
+<br>
+<a id="downloadLink"></a>
+</div>
+
+<!-- TEXT TO PDF -->
+<div id="textpdfTool" class="hidden">
+<textarea id="textData" rows="6" placeholder="Enter text here"></textarea>
+<br>
+<button onclick="generateTextPDF()">Download PDF</button>
+</div>
+
+<!-- IMAGE TO PDF -->
+<div id="imagepdfTool" class="hidden">
+<input type="file" id="imagePDFInput">
+<br>
+<button onclick="generateImagePDF()">Convert to PDF</button>
+</div>
+
+<br>
+<button onclick="goBack()">Back</button>
+
+</div>
 </div>
 
 <script>
+const { jsPDF } = window.jspdf;
 
-// Auto login if saved
-window.onload = function(){
-let savedName = localStorage.getItem("username");
-if(savedName){
-showDashboard(savedName);
-}
-}
+function goNext(){
+var name=document.getElementById("username").value;
 
-function enterApp(){
-let name = document.getElementById("usernameInput").value.trim();
-
-if(name === ""){
-document.getElementById("errorMsg").innerText="Please enter your name";
+if(name==""){
+document.getElementById("msg").innerHTML="Please enter your name";
 return;
 }
 
-localStorage.setItem("username",name);
-showDashboard(name);
-}
-
-function showDashboard(name){
-document.getElementById("usernamePage").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
-document.getElementById("welcomeText").innerText="Hello "+name+" 👋";
+document.getElementById("page1").classList.add("hidden");
+document.getElementById("page2").classList.remove("hidden");
+document.getElementById("welcome").innerHTML="Hello "+name+" 👋";
 }
 
 function logout(){
-localStorage.removeItem("username");
 location.reload();
 }
 
+function openTool(tool){
+document.getElementById("page2").classList.add("hidden");
+document.getElementById("toolPage").classList.remove("hidden");
+
+document.getElementById("resizeTool").classList.add("hidden");
+document.getElementById("textpdfTool").classList.add("hidden");
+document.getElementById("imagepdfTool").classList.add("hidden");
+
+if(tool=="resize"){
+document.getElementById("resizeTool").classList.remove("hidden");
+document.getElementById("toolTitle").innerHTML="Image Resize / Compress";
+}
+
+if(tool=="textpdf"){
+document.getElementById("textpdfTool").classList.remove("hidden");
+document.getElementById("toolTitle").innerHTML="Text to PDF";
+}
+
+if(tool=="imagepdf"){
+document.getElementById("imagepdfTool").classList.remove("hidden");
+document.getElementById("toolTitle").innerHTML="Image to PDF";
+}
+}
+
+function goBack(){
+document.getElementById("toolPage").classList.add("hidden");
+document.getElementById("page2").classList.remove("hidden");
+}
+
+/* IMAGE COMPRESS */
+function resizeImage(){
+var file=document.getElementById("imageInput").files[0];
+if(!file) return;
+
+var reader=new FileReader();
+reader.onload=function(e){
+var img=new Image();
+img.onload=function(){
+var canvas=document.getElementById("canvas");
+var ctx=canvas.getContext("2d");
+
+canvas.width=img.width/2;
+canvas.height=img.height/2;
+
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+var link=document.getElementById("downloadLink");
+link.innerHTML="Download Image";
+link.href=canvas.toDataURL("image/jpeg",0.7);
+link.download="compressed.jpg";
+}
+img.src=e.target.result;
+}
+reader.readAsDataURL(file);
+}
+
+/* TEXT TO PDF */
+function generateTextPDF(){
+var text=document.getElementById("textData").value;
+var doc=new jsPDF();
+doc.text(text,10,10);
+doc.save("text.pdf");
+}
+
+/* IMAGE TO PDF */
+function generateImagePDF(){
+var file=document.getElementById("imagePDFInput").files[0];
+if(!file) return;
+
+var reader=new FileReader();
+reader.onload=function(e){
+var doc=new jsPDF();
+doc.addImage(e.target.result,'JPEG',10,10,180,150);
+doc.save("image.pdf");
+}
+reader.readAsDataURL(file);
+}
 </script>
 
 </body>
