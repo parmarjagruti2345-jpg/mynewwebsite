@@ -1,258 +1,271 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LifeEase AI Toolkit</title>
+<title>Super PDF Toolkit</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-:root{
-  --bg:#fef6ff;
-  --card:#ffffffcc;
-  --primary:#c084fc;
-  --secondary:#f9a8d4;
-  --text:#333;
-}
-
-body.dark{
-  --bg:#1e1e2f;
-  --card:#2c2c3f;
-  --primary:#8b5cf6;
-  --secondary:#ec4899;
-  --text:#fff;
-}
-
 body{
-  margin:0;
-  font-family: 'Segoe UI', sans-serif;
-  background:linear-gradient(135deg,var(--bg),#e0f2fe);
-  color:var(--text);
-  transition:0.3s;
-}
-
-.container{
-  text-align:center;
-  padding:40px;
+margin:0;
+font-family:Segoe UI;
+background:linear-gradient(135deg,#6d28d9,#ec4899);
+color:white;
+text-align:center;
 }
 
 .card{
-  background:var(--card);
-  backdrop-filter:blur(15px);
-  border-radius:20px;
-  padding:25px;
-  margin:20px auto;
-  width:90%;
-  max-width:500px;
-  box-shadow:0 8px 25px rgba(0,0,0,0.1);
-  transition:0.3s;
+background:white;
+color:black;
+max-width:900px;
+margin:30px auto;
+padding:25px;
+border-radius:25px;
+box-shadow:0 15px 40px rgba(0,0,0,0.3);
+animation:fade 0.8s ease-in-out;
+}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
 }
 
 button{
-  background:linear-gradient(45deg,var(--primary),var(--secondary));
-  border:none;
-  padding:10px 20px;
-  border-radius:25px;
-  color:white;
-  cursor:pointer;
-  font-size:15px;
-  margin:5px;
-  transition:0.3s;
+padding:10px 20px;
+border:none;
+border-radius:25px;
+margin:8px;
+background:linear-gradient(45deg,#6d28d9,#ec4899);
+color:white;
+cursor:pointer;
+transition:0.3s;
 }
 
 button:hover{
-  transform:scale(1.05);
+transform:scale(1.07);
 }
 
-input, textarea, select{
-  width:90%;
-  padding:10px;
-  margin:10px 0;
-  border-radius:15px;
-  border:1px solid #ddd;
+input, textarea{
+width:90%;
+padding:10px;
+margin:10px;
+border-radius:15px;
+border:1px solid #ccc;
 }
 
-.tool{
-  display:none;
+.app-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+margin-top:20px;
 }
 
-.dashboard{
-  display:none;
+.app-box{
+background:#f3f4f6;
+padding:20px;
+border-radius:20px;
+cursor:pointer;
+transition:0.3s;
 }
 
-.toggle{
-  position:fixed;
-  top:10px;
-  right:10px;
+.app-box:hover{
+background:#e9d5ff;
+transform:scale(1.05);
 }
 
-h1{
-  color:var(--primary);
-}
-
-.small{
-  font-size:14px;
-  opacity:0.7;
-}
+.hidden{display:none;}
+canvas{max-width:100%;}
 </style>
 </head>
 
 <body>
 
-<button class="toggle" onclick="toggleMode()">🌙</button>
-
-<div class="container">
-
-<!-- Welcome Page -->
-<div id="welcome" class="card">
-  <h1>Welcome to LifeEase AI 💖</h1>
-  <p class="small">Your Cute Smart Productivity Partner</p>
-  <input type="text" id="username" placeholder="Enter your beautiful name">
-  <button onclick="enterApp()">Enter Dashboard ✨</button>
+<!-- USERNAME PAGE -->
+<div class="card" id="usernamePage">
+<h2>Welcome to Super PDF Toolkit</h2>
+<input type="text" id="usernameInput" placeholder="Enter your username">
+<br>
+<button onclick="enterApp()">Enter</button>
 </div>
 
-<!-- Dashboard -->
-<div id="dashboard" class="dashboard">
-  <h1 id="greet"></h1>
+<!-- DASHBOARD -->
+<div class="card hidden" id="dashboard">
+<h2 id="welcomeText"></h2>
+<h3>Select Your Tool</h3>
 
-  <div class="card">
-    <h3>Select Your Tool 🌸</h3>
-    <button onclick="openTool('planner')">📚 Study Planner</button>
-    <button onclick="openTool('expense')">💰 Expense Helper</button>
-    <button onclick="openTool('stress')">🧠 Stress Relief</button>
-    <button onclick="openTool('resume')">📝 Resume Builder</button>
-    <button onclick="openTool('goal')">🎯 Goal Tracker</button>
-  </div>
+<div class="app-grid">
+
+<div class="app-box" onclick="openApp('textPDF')">
+📝 Text to PDF
 </div>
 
-<!-- Study Planner -->
-<div id="planner" class="tool card">
-  <h2>📚 Smart Study Planner</h2>
-  <input type="text" id="subject" placeholder="Enter Subject">
-  <input type="date" id="examdate">
-  <button onclick="generatePlan()">Generate Plan</button>
-  <p id="planResult"></p>
-  <button onclick="goBack()">⬅ Back</button>
+<div class="app-box" onclick="openApp('imagePDF')">
+🖼 Image to PDF
 </div>
 
-<!-- Expense Helper -->
-<div id="expense" class="tool card">
-  <h2>💰 Expense Helper</h2>
-  <input type="number" id="income" placeholder="Monthly Income">
-  <input type="number" id="expenseVal" placeholder="Monthly Expense">
-  <button onclick="calculateExpense()">Check Savings</button>
-  <p id="expenseResult"></p>
-  <button onclick="goBack()">⬅ Back</button>
+<div class="app-box" onclick="openApp('resize')">
+📏 Image Resize
 </div>
 
-<!-- Stress Relief -->
-<div id="stress" class="tool card">
-  <h2>🧠 Stress Relief</h2>
-  <select id="mood">
-    <option>Happy</option>
-    <option>Sad</option>
-    <option>Stressed</option>
-    <option>Overthinking</option>
-  </select>
-  <button onclick="stressTips()">Get Tips</button>
-  <p id="stressResult"></p>
-  <button onclick="goBack()">⬅ Back</button>
+<div class="app-box" onclick="openApp('bgRemove')">
+🎨 Background Remove
 </div>
 
-<!-- Resume Builder -->
-<div id="resume" class="tool card">
-  <h2>📝 Resume Builder</h2>
-  <input type="text" id="resName" placeholder="Your Name">
-  <input type="text" id="resSkill" placeholder="Your Skills">
-  <button onclick="generateResume()">Generate Resume</button>
-  <p id="resumeResult"></p>
-  <button onclick="goBack()">⬅ Back</button>
+</div>
 </div>
 
-<!-- Goal Tracker -->
-<div id="goal" class="tool card">
-  <h2>🎯 Goal Tracker</h2>
-  <input type="text" id="goalInput" placeholder="Enter Your Goal">
-  <button onclick="saveGoal()">Save Goal</button>
-  <p id="goalResult"></p>
-  <button onclick="goBack()">⬅ Back</button>
-</div>
-
+<!-- APP SECTION -->
+<div class="card hidden" id="appSection">
+<button onclick="goBack()">⬅ Back</button>
+<div id="appContent"></div>
 </div>
 
 <script>
-function enterApp(){
-  let name=document.getElementById("username").value;
-  if(name===""){ alert("Please enter your name"); return; }
-  localStorage.setItem("username",name);
-  document.getElementById("welcome").style.display="none";
-  document.getElementById("dashboard").style.display="block";
-  document.getElementById("greet").innerText="Hello "+name+" 🌷";
-}
 
-function openTool(id){
-  document.getElementById("dashboard").style.display="none";
-  document.querySelectorAll(".tool").forEach(t=>t.style.display="none");
-  document.getElementById(id).style.display="block";
+function enterApp(){
+let name=document.getElementById("usernameInput").value;
+if(name==="") return alert("Enter username");
+document.getElementById("usernamePage").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
+document.getElementById("welcomeText").innerText="Hello "+name+" 👋";
 }
 
 function goBack(){
-  document.querySelectorAll(".tool").forEach(t=>t.style.display="none");
-  document.getElementById("dashboard").style.display="block";
+document.getElementById("appSection").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
 }
 
-function generatePlan(){
-  let sub=document.getElementById("subject").value;
-  let date=document.getElementById("examdate").value;
-  document.getElementById("planResult").innerHTML=
-  "✨ Study "+sub+" daily for 2 hours.<br>Revise weekly until "+date+".<br>Sunday = Mock Test 🌟";
+function openApp(type){
+document.getElementById("dashboard").classList.add("hidden");
+document.getElementById("appSection").classList.remove("hidden");
+
+let content="";
+
+if(type==="textPDF"){
+content=`
+<h3>Text to PDF</h3>
+<textarea id="textData" rows="6" placeholder="Type your text"></textarea>
+<br>
+<button onclick="createTextPDF()">Download PDF</button>
+`;
 }
 
-function calculateExpense(){
-  let inc=Number(document.getElementById("income").value);
-  let exp=Number(document.getElementById("expenseVal").value);
-  let save=inc-exp;
-  document.getElementById("expenseResult").innerHTML=
-  save>0? "🎉 You can save ₹"+save+" per month! Smart budgeting!" :
-  "⚠ Try reducing expenses for better savings.";
+if(type==="imagePDF"){
+content=`
+<h3>Image to PDF</h3>
+<input type="file" id="imgPDF" accept="image/*">
+<br>
+<button onclick="createImagePDF()">Download PDF</button>
+`;
 }
 
-function stressTips(){
-  let mood=document.getElementById("mood").value;
-  let msg={
-    "Happy":"🌸 Keep spreading positivity & gratitude journaling.",
-    "Sad":"💖 Talk to someone & take a short walk.",
-    "Stressed":"🧘 Try deep breathing for 5 minutes.",
-    "Overthinking":"📵 Digital detox for 30 mins."
-  };
-  document.getElementById("stressResult").innerText=msg[mood];
+if(type==="resize"){
+content=`
+<h3>Resize Image</h3>
+<input type="file" id="resizeImg" accept="image/*">
+<br>
+<input type="range" min="0.2" max="2" step="0.1" value="1" id="scaleRange">
+<br>
+<button onclick="resizeImage()">Resize</button>
+<div id="resizePreview"></div>
+`;
 }
 
-function generateResume(){
-  let n=document.getElementById("resName").value;
-  let s=document.getElementById("resSkill").value;
-  document.getElementById("resumeResult").innerHTML=
-  "<b>"+n+"</b><br>Skills: "+s+"<br>Creative | Dedicated | Smart Learner 🌟";
+if(type==="bgRemove"){
+content=`
+<h3>Background Remove</h3>
+<input type="file" id="bgImg" accept="image/*">
+<br>
+<button onclick="removeBG()">Remove Background</button>
+<div id="bgPreview"></div>
+`;
 }
 
-function saveGoal(){
-  let g=document.getElementById("goalInput").value;
-  localStorage.setItem("goal",g);
-  document.getElementById("goalResult").innerHTML=
-  "🎯 Goal Saved: "+g+"<br>Daily Reminder: Stay Consistent!";
+document.getElementById("appContent").innerHTML=content;
 }
 
-function toggleMode(){
-  document.body.classList.toggle("dark");
+// TEXT PDF
+function createTextPDF(){
+const text=document.getElementById("textData").value;
+const { jsPDF }=window.jspdf;
+const pdf=new jsPDF();
+pdf.text(text,10,10);
+pdf.save("TextPDF.pdf");
 }
 
-window.onload=function(){
-  let saved=localStorage.getItem("username");
-  if(saved){
-    document.getElementById("welcome").style.display="none";
-    document.getElementById("dashboard").style.display="block";
-    document.getElementById("greet").innerText="Welcome Back "+saved+" 💕";
-  }
+// IMAGE PDF
+function createImagePDF(){
+const file=document.getElementById("imgPDF").files[0];
+if(!file) return alert("Upload image");
+
+const reader=new FileReader();
+reader.onload=function(e){
+const { jsPDF }=window.jspdf;
+const pdf=new jsPDF("p","mm","a4");
+pdf.addImage(e.target.result,"JPEG",10,10,190,270);
+pdf.save("ImagePDF.pdf");
 }
+reader.readAsDataURL(file);
+}
+
+// RESIZE
+function resizeImage(){
+const file=document.getElementById("resizeImg").files[0];
+const scale=document.getElementById("scaleRange").value;
+if(!file) return alert("Upload image");
+
+const img=new Image();
+const reader=new FileReader();
+
+reader.onload=function(e){
+img.src=e.target.result;
+img.onload=function(){
+const canvas=document.createElement("canvas");
+canvas.width=img.width*scale;
+canvas.height=img.height*scale;
+const ctx=canvas.getContext("2d");
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
+document.getElementById("resizePreview").innerHTML="";
+document.getElementById("resizePreview").appendChild(canvas);
+}
+}
+reader.readAsDataURL(file);
+}
+
+// BG REMOVE
+function removeBG(){
+const file=document.getElementById("bgImg").files[0];
+if(!file) return alert("Upload image");
+
+const img=new Image();
+const reader=new FileReader();
+
+reader.onload=function(e){
+img.src=e.target.result;
+img.onload=function(){
+const canvas=document.createElement("canvas");
+canvas.width=img.width;
+canvas.height=img.height;
+const ctx=canvas.getContext("2d");
+ctx.drawImage(img,0,0);
+const data=ctx.getImageData(0,0,canvas.width,canvas.height);
+
+for(let i=0;i<data.data.length;i+=4){
+if(data.data[i]>220 && data.data[i+1]>220 && data.data[i+2]>220){
+data.data[i+3]=0;
+}
+}
+
+ctx.putImageData(data,0,0);
+document.getElementById("bgPreview").innerHTML="";
+document.getElementById("bgPreview").appendChild(canvas);
+}
+}
+reader.readAsDataURL(file);
+}
+
 </script>
 
 </body>
