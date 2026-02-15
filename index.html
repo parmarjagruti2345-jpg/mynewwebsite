@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- WEBSITE NAME -->
 <title>Student Pro Toolkit</title>
+
+<!-- FAVICON -->
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/337/337946.png">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -13,24 +19,30 @@ font-family:Segoe UI;
 background:linear-gradient(135deg,#6d28d9,#ec4899);
 color:white;
 text-align:center;
-transition:0.4s;
 }
-.dark{
-background:#111;
+
+/* TOP HEADER */
+.header{
+background:rgba(0,0,0,0.2);
+padding:15px;
+font-size:22px;
+font-weight:bold;
+letter-spacing:1px;
 }
 
 .card{
 background:white;
 color:black;
-max-width:1000px;
+max-width:900px;
 margin:30px auto;
 padding:25px;
-border-radius:25px;
-box-shadow:0 15px 40px rgba(0,0,0,0.3);
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
 animation:fade 0.7s ease-in-out;
 }
+
 @keyframes fade{
-from{opacity:0;transform:translateY(20px);}
+from{opacity:0;transform:translateY(15px);}
 to{opacity:1;transform:translateY(0);}
 }
 
@@ -46,50 +58,16 @@ transition:0.3s;
 }
 button:hover{transform:scale(1.08);}
 
-input, textarea{
-padding:8px;
-margin:6px;
-border-radius:10px;
-border:1px solid #ccc;
-}
-
-.app-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:15px;
-margin-top:20px;
-}
-
-.app-box{
-background:#f3f4f6;
-padding:20px;
-border-radius:20px;
-cursor:pointer;
-transition:0.3s;
-}
-.app-box:hover{
-background:#e9d5ff;
-transform:scale(1.05);
-}
-
 .hidden{display:none;}
-
-.editor-page{
-border:1px solid #ccc;
-min-height:250px;
-padding:15px;
-margin:10px 0;
-text-align:left;
-border-radius:10px;
-}
-.toolbar button{
-background:#ddd;
-color:black;
-}
+img{max-width:100%;}
 </style>
 </head>
 
 <body>
+
+<div class="header">
+🎓 Student Pro Toolkit
+</div>
 
 <div class="card" id="usernamePage">
 <h2>Welcome</h2>
@@ -100,29 +78,20 @@ color:black;
 
 <div class="card hidden" id="dashboard">
 <h2 id="welcomeText"></h2>
-<button onclick="toggleDark()">Dark Mode</button>
 
-<div class="app-grid">
+<button onclick="openTool('resize')">📏 Resize / Compress</button>
+<button onclick="openTool('bg')">🎨 Background Remove</button>
 
-<div class="app-box" onclick="openApp('textPDF')">📝 Text to PDF</div>
-<div class="app-box" onclick="openApp('imagePDF')">🖼 Image to PDF</div>
-<div class="app-box" onclick="openApp('resize')">📏 Resize / Compress</div>
-<div class="app-box" onclick="openApp('bgRemove')">🎨 Background Remove</div>
-
-</div>
-</div>
-
-<div class="card hidden" id="appSection">
-<button onclick="goBack()">⬅ Back</button>
-<div id="appContent"></div>
+<div id="toolArea"></div>
 </div>
 
 <script>
+
 let username=localStorage.getItem("username");
 if(username){
 document.getElementById("usernamePage").classList.add("hidden");
 document.getElementById("dashboard").classList.remove("hidden");
-document.getElementById("welcomeText").innerText="Hello "+username;
+document.getElementById("welcomeText").innerText="Hello "+username+" 👋";
 }
 
 function enterApp(){
@@ -132,142 +101,52 @@ localStorage.setItem("username",name);
 location.reload();
 }
 
-function toggleDark(){
-document.body.classList.toggle("dark");
-}
-
-function goBack(){
-document.getElementById("appSection").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
-}
-
-function openApp(type){
-document.getElementById("dashboard").classList.add("hidden");
-document.getElementById("appSection").classList.remove("hidden");
-
-let content="";
-
-if(type==="textPDF"){
-content=`
-<h3>Word Style Editor</h3>
-
-<div class="toolbar">
-<button onclick="format('bold')">Bold</button>
-<button onclick="format('italic')">Italic</button>
-<button onclick="format('underline')">Underline</button>
-<button onclick="addPage()">Add Page</button>
-</div>
-
-<div id="pages"></div>
-
-<button onclick="downloadTextPDF()">Download PDF</button>
-`;
-setTimeout(()=>addPage(),100);
-}
-
-if(type==="imagePDF"){
-content=`
-<h3>Multi Image to PDF</h3>
-<input type="file" id="multiImg" multiple accept="image/*">
-<br>
-<button onclick="downloadImagePDF()">Download PDF</button>
-`;
-}
+function openTool(type){
+let area=document.getElementById("toolArea");
+area.innerHTML="";
 
 if(type==="resize"){
-content=`
-<h3>Resize / Compress</h3>
-<input type="file" id="resizeImg" accept="image/*">
-<br>
+area.innerHTML=`
+<h3>Resize / Compress Image</h3>
+<input type="file" id="resizeImg" accept="image/*"><br>
 <label>Scale:</label>
-<input type="range" min="0.1" max="2" step="0.1" value="1" id="scaleRange">
-<br>
-<label>Target KB:</label>
-<input type="number" id="targetKB" placeholder="Enter KB">
-<br>
-<button onclick="resizeImage()">Process</button>
-<div id="resizeInfo"></div>
-<button onclick="downloadResized()">Download Image</button>
+<input type="range" min="0.1" max="2" step="0.1" value="1" id="scaleRange"><br>
+<label>Target Size (KB):</label>
+<input type="number" id="targetKB"><br>
+<button onclick="processResize()">Process</button>
+<p id="sizeInfo"></p>
+<img id="resizePreview"><br>
+<button onclick="downloadResized()">Download</button>
 `;
 }
 
-if(type==="bgRemove"){
-content=`
+if(type==="bg"){
+area.innerHTML=`
 <h3>Background Remove</h3>
-<input type="file" id="bgImg" accept="image/*">
-<br>
-<button onclick="removeBG()">Remove</button>
+<input type="file" id="bgImg" accept="image/*"><br>
+<button onclick="processBG()">Remove Background</button>
+<img id="bgPreview"><br>
 <button onclick="downloadBG()">Download PNG</button>
-<div id="bgPreview"></div>
 `;
-}
-
-document.getElementById("appContent").innerHTML=content;
-}
-
-/* TEXT EDITOR */
-function format(cmd){ document.execCommand(cmd); }
-
-function addPage(){
-let div=document.createElement("div");
-div.className="editor-page";
-div.contentEditable="true";
-div.innerHTML="Start writing here...";
-document.getElementById("pages").appendChild(div);
-}
-
-function downloadTextPDF(){
-const { jsPDF }=window.jspdf;
-const pdf=new jsPDF("p","mm","a4");
-
-let y=10;
-document.querySelectorAll(".editor-page").forEach((page,i)=>{
-let text=page.innerText;
-let lines=pdf.splitTextToSize(text,180);
-pdf.text(lines,10,y);
-if(i<document.querySelectorAll(".editor-page").length-1)
-pdf.addPage();
-});
-pdf.save("TextPDF.pdf");
-}
-
-/* IMAGE PDF */
-function downloadImagePDF(){
-const files=document.getElementById("multiImg").files;
-if(files.length===0) return alert("Upload images");
-
-const { jsPDF }=window.jspdf;
-const pdf=new jsPDF("p","mm","a4");
-
-let count=0;
-for(let i=0;i<files.length;i++){
-const reader=new FileReader();
-reader.onload=function(e){
-if(count>0) pdf.addPage();
-pdf.addImage(e.target.result,"JPEG",10,10,190,270);
-count++;
-if(count===files.length) pdf.save("ImagesPDF.pdf");
-}
-reader.readAsDataURL(files[i]);
 }
 }
 
 /* RESIZE */
-let resizedData=null;
 
-function resizeImage(){
+let resizedImageData=null;
+
+function processResize(){
 const file=document.getElementById("resizeImg").files[0];
-if(!file) return alert("Upload image");
+if(!file) return alert("Upload image first");
 
-const scale=document.getElementById("scaleRange").value;
-const targetKB=document.getElementById("targetKB").value;
+const scale=parseFloat(document.getElementById("scaleRange").value);
+const targetKB=parseInt(document.getElementById("targetKB").value);
 
-const img=new Image();
 const reader=new FileReader();
-
 reader.onload=function(e){
-img.src=e.target.result;
+const img=new Image();
 img.onload=function(){
+
 const canvas=document.createElement("canvas");
 canvas.width=img.width*scale;
 canvas.height=img.height*scale;
@@ -275,69 +154,84 @@ const ctx=canvas.getContext("2d");
 ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
 let quality=0.9;
+let dataURL=canvas.toDataURL("image/jpeg",quality);
+
 if(targetKB){
-quality=0.7;
+while((dataURL.length*3/4)/1024 > targetKB && quality>0.1){
+quality-=0.05;
+dataURL=canvas.toDataURL("image/jpeg",quality);
+}
 }
 
-resizedData=canvas.toDataURL("image/jpeg",quality);
+resizedImageData=dataURL;
 
-let sizeKB=Math.round((resizedData.length*3/4)/1024);
-document.getElementById("resizeInfo").innerText="Size: "+sizeKB+" KB";
+let finalSize=Math.round((dataURL.length*3/4)/1024);
+document.getElementById("sizeInfo").innerText="Final Size: "+finalSize+" KB";
+
+document.getElementById("resizePreview").src=dataURL;
+
 }
+img.src=e.target.result;
 }
 reader.readAsDataURL(file);
 }
 
 function downloadResized(){
-if(!resizedData) return alert("Process first");
+if(!resizedImageData) return alert("Process first");
 let a=document.createElement("a");
-a.href=resizedData;
+a.href=resizedImageData;
 a.download="Resized.jpg";
 a.click();
 }
 
 /* BG REMOVE */
-let bgData=null;
 
-function removeBG(){
+let bgImageData=null;
+
+function processBG(){
 const file=document.getElementById("bgImg").files[0];
 if(!file) return alert("Upload image");
 
-const img=new Image();
 const reader=new FileReader();
-
 reader.onload=function(e){
-img.src=e.target.result;
-img.onload=function(){
+const img=new Image();
+img.onload=function{
+
 const canvas=document.createElement("canvas");
 canvas.width=img.width;
 canvas.height=img.height;
 const ctx=canvas.getContext("2d");
 ctx.drawImage(img,0,0);
-const data=ctx.getImageData(0,0,canvas.width,canvas.height);
 
-for(let i=0;i<data.data.length;i+=4){
-if(data.data[i]>220 && data.data[i+1]>220 && data.data[i+2]>220){
-data.data[i+3]=0;
+let imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+let data=imageData.data;
+
+for(let i=0;i<data.length;i+=4){
+if(data[i]>230 && data[i+1]>230 && data[i+2]>230){
+data[i+3]=0;
 }
 }
 
-ctx.putImageData(data,0,0);
-bgData=canvas.toDataURL("image/png");
-document.getElementById("bgPreview").innerHTML="<img src='"+bgData+"' width='100%'>";
+ctx.putImageData(imageData,0,0);
+
+bgImageData=canvas.toDataURL("image/png");
+document.getElementById("bgPreview").src=bgImageData;
+
 }
+img.src=e.target.result;
 }
 reader.readAsDataURL(file);
 }
 
 function downloadBG(){
-if(!bgData) return alert("Remove background first");
+if(!bgImageData) return alert("Remove background first");
 let a=document.createElement("a");
-a.href=bgData;
-a.download="NoBG.png";
+a.href=bgImageData;
+a.download="NoBackground.png";
 a.click();
 }
 
 </script>
+
 </body>
 </html>
