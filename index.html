@@ -3,14 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- WEBSITE NAME -->
 <title>Student Pro Toolkit</title>
-
-<!-- FAVICON -->
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/337/337946.png">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body{
@@ -21,214 +14,93 @@ color:white;
 text-align:center;
 }
 
-/* TOP HEADER */
 .header{
-background:rgba(0,0,0,0.2);
 padding:15px;
 font-size:22px;
 font-weight:bold;
-letter-spacing:1px;
+background:rgba(0,0,0,0.2);
 }
 
 .card{
 background:white;
 color:black;
-max-width:900px;
-margin:30px auto;
+max-width:500px;
+margin:40px auto;
 padding:25px;
 border-radius:20px;
-box-shadow:0 10px 30px rgba(0,0,0,0.3);
-animation:fade 0.7s ease-in-out;
-}
-
-@keyframes fade{
-from{opacity:0;transform:translateY(15px);}
-to{opacity:1;transform:translateY(0);}
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 
 button{
 padding:8px 18px;
 border:none;
 border-radius:20px;
-margin:6px;
+margin:8px;
 background:linear-gradient(45deg,#6d28d9,#ec4899);
 color:white;
 cursor:pointer;
-transition:0.3s;
 }
-button:hover{transform:scale(1.08);}
 
 .hidden{display:none;}
-img{max-width:100%;}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-🎓 Student Pro Toolkit
-</div>
+<div class="header">🎓 Student Pro Toolkit</div>
 
+<!-- USERNAME PAGE -->
 <div class="card" id="usernamePage">
-<h2>Welcome</h2>
-<input type="text" id="usernameInput" placeholder="Enter username">
+<h2>Enter Your Name</h2>
+<input type="text" id="usernameInput" placeholder="Type your name">
 <br>
 <button onclick="enterApp()">Enter</button>
+<p id="errorMsg" style="color:red;"></p>
 </div>
 
+<!-- DASHBOARD PAGE -->
 <div class="card hidden" id="dashboard">
 <h2 id="welcomeText"></h2>
+<button onclick="logout()">Logout</button>
+<br><br>
 
-<button onclick="openTool('resize')">📏 Resize / Compress</button>
-<button onclick="openTool('bg')">🎨 Background Remove</button>
+<h3>Select Tool</h3>
+<button onclick="alert('Resize Tool Open')">📏 Resize</button>
+<button onclick="alert('Background Tool Open')">🎨 Background Remove</button>
 
-<div id="toolArea"></div>
 </div>
 
 <script>
 
-let username=localStorage.getItem("username");
-if(username){
-document.getElementById("usernamePage").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
-document.getElementById("welcomeText").innerText="Hello "+username+" 👋";
+// Auto login if saved
+window.onload = function(){
+let savedName = localStorage.getItem("username");
+if(savedName){
+showDashboard(savedName);
+}
 }
 
 function enterApp(){
-let name=document.getElementById("usernameInput").value;
-if(name==="") return alert("Enter username");
+let name = document.getElementById("usernameInput").value.trim();
+
+if(name === ""){
+document.getElementById("errorMsg").innerText="Please enter your name";
+return;
+}
+
 localStorage.setItem("username",name);
+showDashboard(name);
+}
+
+function showDashboard(name){
+document.getElementById("usernamePage").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
+document.getElementById("welcomeText").innerText="Hello "+name+" 👋";
+}
+
+function logout(){
+localStorage.removeItem("username");
 location.reload();
-}
-
-function openTool(type){
-let area=document.getElementById("toolArea");
-area.innerHTML="";
-
-if(type==="resize"){
-area.innerHTML=`
-<h3>Resize / Compress Image</h3>
-<input type="file" id="resizeImg" accept="image/*"><br>
-<label>Scale:</label>
-<input type="range" min="0.1" max="2" step="0.1" value="1" id="scaleRange"><br>
-<label>Target Size (KB):</label>
-<input type="number" id="targetKB"><br>
-<button onclick="processResize()">Process</button>
-<p id="sizeInfo"></p>
-<img id="resizePreview"><br>
-<button onclick="downloadResized()">Download</button>
-`;
-}
-
-if(type==="bg"){
-area.innerHTML=`
-<h3>Background Remove</h3>
-<input type="file" id="bgImg" accept="image/*"><br>
-<button onclick="processBG()">Remove Background</button>
-<img id="bgPreview"><br>
-<button onclick="downloadBG()">Download PNG</button>
-`;
-}
-}
-
-/* RESIZE */
-
-let resizedImageData=null;
-
-function processResize(){
-const file=document.getElementById("resizeImg").files[0];
-if(!file) return alert("Upload image first");
-
-const scale=parseFloat(document.getElementById("scaleRange").value);
-const targetKB=parseInt(document.getElementById("targetKB").value);
-
-const reader=new FileReader();
-reader.onload=function(e){
-const img=new Image();
-img.onload=function(){
-
-const canvas=document.createElement("canvas");
-canvas.width=img.width*scale;
-canvas.height=img.height*scale;
-const ctx=canvas.getContext("2d");
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
-let quality=0.9;
-let dataURL=canvas.toDataURL("image/jpeg",quality);
-
-if(targetKB){
-while((dataURL.length*3/4)/1024 > targetKB && quality>0.1){
-quality-=0.05;
-dataURL=canvas.toDataURL("image/jpeg",quality);
-}
-}
-
-resizedImageData=dataURL;
-
-let finalSize=Math.round((dataURL.length*3/4)/1024);
-document.getElementById("sizeInfo").innerText="Final Size: "+finalSize+" KB";
-
-document.getElementById("resizePreview").src=dataURL;
-
-}
-img.src=e.target.result;
-}
-reader.readAsDataURL(file);
-}
-
-function downloadResized(){
-if(!resizedImageData) return alert("Process first");
-let a=document.createElement("a");
-a.href=resizedImageData;
-a.download="Resized.jpg";
-a.click();
-}
-
-/* BG REMOVE */
-
-let bgImageData=null;
-
-function processBG(){
-const file=document.getElementById("bgImg").files[0];
-if(!file) return alert("Upload image");
-
-const reader=new FileReader();
-reader.onload=function(e){
-const img=new Image();
-img.onload=function{
-
-const canvas=document.createElement("canvas");
-canvas.width=img.width;
-canvas.height=img.height;
-const ctx=canvas.getContext("2d");
-ctx.drawImage(img,0,0);
-
-let imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-let data=imageData.data;
-
-for(let i=0;i<data.length;i+=4){
-if(data[i]>230 && data[i+1]>230 && data[i+2]>230){
-data[i+3]=0;
-}
-}
-
-ctx.putImageData(imageData,0,0);
-
-bgImageData=canvas.toDataURL("image/png");
-document.getElementById("bgPreview").src=bgImageData;
-
-}
-img.src=e.target.result;
-}
-reader.readAsDataURL(file);
-}
-
-function downloadBG(){
-if(!bgImageData) return alert("Remove background first");
-let a=document.createElement("a");
-a.href=bgImageData;
-a.download="NoBackground.png";
-a.click();
 }
 
 </script>
