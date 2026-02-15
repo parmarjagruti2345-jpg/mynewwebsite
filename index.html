@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Super PDF Toolkit</title>
-
+<title>Student Pro Toolkit</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -14,44 +13,43 @@ font-family:Segoe UI;
 background:linear-gradient(135deg,#6d28d9,#ec4899);
 color:white;
 text-align:center;
+transition:0.4s;
+}
+.dark{
+background:#111;
 }
 
 .card{
 background:white;
 color:black;
-max-width:900px;
+max-width:1000px;
 margin:30px auto;
 padding:25px;
 border-radius:25px;
 box-shadow:0 15px 40px rgba(0,0,0,0.3);
-animation:fade 0.8s ease-in-out;
+animation:fade 0.7s ease-in-out;
 }
-
 @keyframes fade{
 from{opacity:0;transform:translateY(20px);}
 to{opacity:1;transform:translateY(0);}
 }
 
 button{
-padding:10px 20px;
+padding:8px 18px;
 border:none;
-border-radius:25px;
-margin:8px;
+border-radius:20px;
+margin:6px;
 background:linear-gradient(45deg,#6d28d9,#ec4899);
 color:white;
 cursor:pointer;
 transition:0.3s;
 }
-
-button:hover{
-transform:scale(1.07);
-}
+button:hover{transform:scale(1.08);}
 
 input, textarea{
-width:90%;
-padding:10px;
-margin:10px;
-border-radius:15px;
+padding:8px;
+margin:6px;
+border-radius:10px;
 border:1px solid #ccc;
 }
 
@@ -69,67 +67,73 @@ border-radius:20px;
 cursor:pointer;
 transition:0.3s;
 }
-
 .app-box:hover{
 background:#e9d5ff;
 transform:scale(1.05);
 }
 
 .hidden{display:none;}
-canvas{max-width:100%;}
+
+.editor-page{
+border:1px solid #ccc;
+min-height:250px;
+padding:15px;
+margin:10px 0;
+text-align:left;
+border-radius:10px;
+}
+.toolbar button{
+background:#ddd;
+color:black;
+}
 </style>
 </head>
 
 <body>
 
-<!-- USERNAME PAGE -->
 <div class="card" id="usernamePage">
-<h2>Welcome to Super PDF Toolkit</h2>
-<input type="text" id="usernameInput" placeholder="Enter your username">
+<h2>Welcome</h2>
+<input type="text" id="usernameInput" placeholder="Enter username">
 <br>
 <button onclick="enterApp()">Enter</button>
 </div>
 
-<!-- DASHBOARD -->
 <div class="card hidden" id="dashboard">
 <h2 id="welcomeText"></h2>
-<h3>Select Your Tool</h3>
+<button onclick="toggleDark()">Dark Mode</button>
 
 <div class="app-grid">
 
-<div class="app-box" onclick="openApp('textPDF')">
-📝 Text to PDF
-</div>
-
-<div class="app-box" onclick="openApp('imagePDF')">
-🖼 Image to PDF
-</div>
-
-<div class="app-box" onclick="openApp('resize')">
-📏 Image Resize
-</div>
-
-<div class="app-box" onclick="openApp('bgRemove')">
-🎨 Background Remove
-</div>
+<div class="app-box" onclick="openApp('textPDF')">📝 Text to PDF</div>
+<div class="app-box" onclick="openApp('imagePDF')">🖼 Image to PDF</div>
+<div class="app-box" onclick="openApp('resize')">📏 Resize / Compress</div>
+<div class="app-box" onclick="openApp('bgRemove')">🎨 Background Remove</div>
 
 </div>
 </div>
 
-<!-- APP SECTION -->
 <div class="card hidden" id="appSection">
 <button onclick="goBack()">⬅ Back</button>
 <div id="appContent"></div>
 </div>
 
 <script>
+let username=localStorage.getItem("username");
+if(username){
+document.getElementById("usernamePage").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
+document.getElementById("welcomeText").innerText="Hello "+username;
+}
 
 function enterApp(){
 let name=document.getElementById("usernameInput").value;
 if(name==="") return alert("Enter username");
-document.getElementById("usernamePage").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
-document.getElementById("welcomeText").innerText="Hello "+name+" 👋";
+localStorage.setItem("username",name);
+location.reload();
+}
+
+function toggleDark(){
+document.body.classList.toggle("dark");
 }
 
 function goBack(){
@@ -145,31 +149,45 @@ let content="";
 
 if(type==="textPDF"){
 content=`
-<h3>Text to PDF</h3>
-<textarea id="textData" rows="6" placeholder="Type your text"></textarea>
-<br>
-<button onclick="createTextPDF()">Download PDF</button>
+<h3>Word Style Editor</h3>
+
+<div class="toolbar">
+<button onclick="format('bold')">Bold</button>
+<button onclick="format('italic')">Italic</button>
+<button onclick="format('underline')">Underline</button>
+<button onclick="addPage()">Add Page</button>
+</div>
+
+<div id="pages"></div>
+
+<button onclick="downloadTextPDF()">Download PDF</button>
 `;
+setTimeout(()=>addPage(),100);
 }
 
 if(type==="imagePDF"){
 content=`
-<h3>Image to PDF</h3>
-<input type="file" id="imgPDF" accept="image/*">
+<h3>Multi Image to PDF</h3>
+<input type="file" id="multiImg" multiple accept="image/*">
 <br>
-<button onclick="createImagePDF()">Download PDF</button>
+<button onclick="downloadImagePDF()">Download PDF</button>
 `;
 }
 
 if(type==="resize"){
 content=`
-<h3>Resize Image</h3>
+<h3>Resize / Compress</h3>
 <input type="file" id="resizeImg" accept="image/*">
 <br>
-<input type="range" min="0.2" max="2" step="0.1" value="1" id="scaleRange">
+<label>Scale:</label>
+<input type="range" min="0.1" max="2" step="0.1" value="1" id="scaleRange">
 <br>
-<button onclick="resizeImage()">Resize</button>
-<div id="resizePreview"></div>
+<label>Target KB:</label>
+<input type="number" id="targetKB" placeholder="Enter KB">
+<br>
+<button onclick="resizeImage()">Process</button>
+<div id="resizeInfo"></div>
+<button onclick="downloadResized()">Download Image</button>
 `;
 }
 
@@ -178,7 +196,8 @@ content=`
 <h3>Background Remove</h3>
 <input type="file" id="bgImg" accept="image/*">
 <br>
-<button onclick="removeBG()">Remove Background</button>
+<button onclick="removeBG()">Remove</button>
+<button onclick="downloadBG()">Download PNG</button>
 <div id="bgPreview"></div>
 `;
 }
@@ -186,35 +205,62 @@ content=`
 document.getElementById("appContent").innerHTML=content;
 }
 
-// TEXT PDF
-function createTextPDF(){
-const text=document.getElementById("textData").value;
+/* TEXT EDITOR */
+function format(cmd){ document.execCommand(cmd); }
+
+function addPage(){
+let div=document.createElement("div");
+div.className="editor-page";
+div.contentEditable="true";
+div.innerHTML="Start writing here...";
+document.getElementById("pages").appendChild(div);
+}
+
+function downloadTextPDF(){
 const { jsPDF }=window.jspdf;
-const pdf=new jsPDF();
-pdf.text(text,10,10);
+const pdf=new jsPDF("p","mm","a4");
+
+let y=10;
+document.querySelectorAll(".editor-page").forEach((page,i)=>{
+let text=page.innerText;
+let lines=pdf.splitTextToSize(text,180);
+pdf.text(lines,10,y);
+if(i<document.querySelectorAll(".editor-page").length-1)
+pdf.addPage();
+});
 pdf.save("TextPDF.pdf");
 }
 
-// IMAGE PDF
-function createImagePDF(){
-const file=document.getElementById("imgPDF").files[0];
-if(!file) return alert("Upload image");
+/* IMAGE PDF */
+function downloadImagePDF(){
+const files=document.getElementById("multiImg").files;
+if(files.length===0) return alert("Upload images");
 
-const reader=new FileReader();
-reader.onload=function(e){
 const { jsPDF }=window.jspdf;
 const pdf=new jsPDF("p","mm","a4");
+
+let count=0;
+for(let i=0;i<files.length;i++){
+const reader=new FileReader();
+reader.onload=function(e){
+if(count>0) pdf.addPage();
 pdf.addImage(e.target.result,"JPEG",10,10,190,270);
-pdf.save("ImagePDF.pdf");
+count++;
+if(count===files.length) pdf.save("ImagesPDF.pdf");
 }
-reader.readAsDataURL(file);
+reader.readAsDataURL(files[i]);
+}
 }
 
-// RESIZE
+/* RESIZE */
+let resizedData=null;
+
 function resizeImage(){
 const file=document.getElementById("resizeImg").files[0];
-const scale=document.getElementById("scaleRange").value;
 if(!file) return alert("Upload image");
+
+const scale=document.getElementById("scaleRange").value;
+const targetKB=document.getElementById("targetKB").value;
 
 const img=new Image();
 const reader=new FileReader();
@@ -227,14 +273,32 @@ canvas.width=img.width*scale;
 canvas.height=img.height*scale;
 const ctx=canvas.getContext("2d");
 ctx.drawImage(img,0,0,canvas.width,canvas.height);
-document.getElementById("resizePreview").innerHTML="";
-document.getElementById("resizePreview").appendChild(canvas);
+
+let quality=0.9;
+if(targetKB){
+quality=0.7;
+}
+
+resizedData=canvas.toDataURL("image/jpeg",quality);
+
+let sizeKB=Math.round((resizedData.length*3/4)/1024);
+document.getElementById("resizeInfo").innerText="Size: "+sizeKB+" KB";
 }
 }
 reader.readAsDataURL(file);
 }
 
-// BG REMOVE
+function downloadResized(){
+if(!resizedData) return alert("Process first");
+let a=document.createElement("a");
+a.href=resizedData;
+a.download="Resized.jpg";
+a.click();
+}
+
+/* BG REMOVE */
+let bgData=null;
+
 function removeBG(){
 const file=document.getElementById("bgImg").files[0];
 if(!file) return alert("Upload image");
@@ -259,14 +323,21 @@ data.data[i+3]=0;
 }
 
 ctx.putImageData(data,0,0);
-document.getElementById("bgPreview").innerHTML="";
-document.getElementById("bgPreview").appendChild(canvas);
+bgData=canvas.toDataURL("image/png");
+document.getElementById("bgPreview").innerHTML="<img src='"+bgData+"' width='100%'>";
 }
 }
 reader.readAsDataURL(file);
 }
 
-</script>
+function downloadBG(){
+if(!bgData) return alert("Remove background first");
+let a=document.createElement("a");
+a.href=bgData;
+a.download="NoBG.png";
+a.click();
+}
 
+</script>
 </body>
 </html>
