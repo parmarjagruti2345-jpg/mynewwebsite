@@ -3,29 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Pro Toolkit</title>
+<title>Student Toolkit</title>
 
-<!-- jsPDF CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <style>
 body{
 margin:0;
-font-family:Segoe UI, sans-serif;
-background:linear-gradient(135deg,#4f46e5,#ec4899);
-color:white;
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#ffe0f0,#d0f0ff);
 }
 
-/* HEADER */
 .header{
 padding:20px;
-font-size:24px;
+font-size:26px;
 font-weight:bold;
 text-align:center;
-background:rgba(0,0,0,0.2);
+background:white;
+color:#ff4fa3;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* SECTION */
 .section{
 min-height:100vh;
 display:flex;
@@ -37,39 +36,35 @@ padding:20px;
 
 .card{
 background:white;
-color:black;
 width:95%;
-max-width:1000px;
+max-width:1100px;
 padding:30px;
-border-radius:20px;
-box-shadow:0 20px 40px rgba(0,0,0,0.3);
+border-radius:25px;
+box-shadow:0 20px 40px rgba(0,0,0,0.15);
 text-align:center;
 }
 
-input, textarea{
+input, textarea, select{
 padding:10px;
 width:80%;
 max-width:500px;
-border-radius:10px;
-border:1px solid #ccc;
+border-radius:12px;
+border:1px solid #ddd;
 margin:10px;
 }
 
 button{
 padding:10px 20px;
 border:none;
-border-radius:20px;
-background:linear-gradient(45deg,#4f46e5,#ec4899);
+border-radius:30px;
+background:linear-gradient(45deg,#ff7eb3,#65d6ff);
 color:white;
 cursor:pointer;
 margin:10px;
-font-size:14px;
-transition:0.3s;
+font-weight:bold;
 }
 
-button:hover{
-transform:scale(1.05);
-}
+button:hover{transform:scale(1.05);}
 
 .grid{
 display:grid;
@@ -79,38 +74,33 @@ margin-top:20px;
 }
 
 .tool{
-background:#f3f4f6;
+background:#fdf2ff;
 padding:20px;
-border-radius:15px;
+border-radius:20px;
 cursor:pointer;
+font-weight:bold;
 transition:0.3s;
 }
 
 .tool:hover{
-background:#ddd6fe;
+background:#e0f7ff;
 transform:scale(1.05);
 }
 
-.hidden{
-display:none;
-}
-
-canvas{
-max-width:100%;
-margin-top:20px;
-}
+.hidden{display:none;}
+.downloadBtn{display:none;background:#22c55e;}
 </style>
 </head>
 
 <body>
 
-<div class="header">🎓 Student Pro Toolkit</div>
+<div class="header">🎓 Student Toolkit</div>
 
-<!-- USERNAME PAGE -->
+<!-- LOGIN PAGE -->
 <div class="section" id="page1">
 <div class="card">
 <h2>Enter Your Name</h2>
-<input type="text" id="username" placeholder="Type your name">
+<input type="text" id="username">
 <br>
 <button onclick="goNext()">Enter</button>
 <p id="msg" style="color:red;"></p>
@@ -124,12 +114,16 @@ margin-top:20px;
 <h3>Select Tool</h3>
 
 <div class="grid">
-<div class="tool" onclick="openTool('resize')">📏 Resize / Compress</div>
 <div class="tool" onclick="openTool('textpdf')">📝 Text to PDF</div>
-<div class="tool" onclick="openTool('imagepdf')">🖼 Image to PDF</div>
+<div class="tool" onclick="openTool('imagepdf')">🖼 Multiple Photo to PDF</div>
+<div class="tool" onclick="openTool('convert')">🔄 File Converter</div>
+<div class="tool" onclick="openTool('resize')">📏 Photo Resize</div>
+
+<div class="tool" onclick="openTool('singlephoto')">📸 Photo → PDF</div>
+<div class="tool" onclick="openTool('mergepdf')">🔗 PDF Merge</div>
+<div class="tool" onclick="openTool('splitpdf')">✂️ PDF Split</div>
 </div>
 
-<br>
 <button onclick="logout()">Logout</button>
 </div>
 </div>
@@ -139,31 +133,60 @@ margin-top:20px;
 <div class="card">
 <h2 id="toolTitle"></h2>
 
-<!-- RESIZE TOOL -->
-<div id="resizeTool" class="hidden">
-<input type="file" id="imageInput">
-<br>
-<button onclick="resizeImage()">Compress 50%</button>
-<canvas id="canvas"></canvas>
-<br>
-<a id="downloadLink"></a>
-</div>
-
-<!-- TEXT TO PDF -->
+<!-- Existing 4 tools (same logic) -->
 <div id="textpdfTool" class="hidden">
-<textarea id="textData" rows="6" placeholder="Enter text here"></textarea>
+<textarea id="simpleText" rows="6" placeholder="Type here..."></textarea>
 <br>
-<button onclick="generateTextPDF()">Download PDF</button>
+<button onclick="generateSimplePDF()">Generate PDF</button>
 </div>
 
-<!-- IMAGE TO PDF -->
 <div id="imagepdfTool" class="hidden">
-<input type="file" id="imagePDFInput">
+<input type="file" id="multiImageInput" multiple>
 <br>
-<button onclick="generateImagePDF()">Convert to PDF</button>
+<button onclick="generateMultiPDF()">Generate PDF</button>
 </div>
 
+<div id="convertTool" class="hidden">
+<input type="file" id="convertInput">
+<select id="convertType">
+<option value="png">JPG → PNG</option>
+<option value="jpg">PNG → JPG</option>
+<option value="pdf">Image → PDF</option>
+</select>
 <br>
+<button onclick="convertFile()">Convert</button>
+</div>
+
+<div id="resizeTool" class="hidden">
+<input type="file" id="resizeInput" multiple>
+<input type="number" id="resizePercent" placeholder="Resize %">
+<br>
+<button onclick="resizePhotos()">Resize</button>
+</div>
+
+<!-- NEW TOOL: Single Photo PDF -->
+<div id="singlephotoTool" class="hidden">
+<input type="file" id="singlePhoto">
+<br>
+<button onclick="photoToPDF()">Convert to PDF</button>
+</div>
+
+<!-- NEW TOOL: PDF MERGE -->
+<div id="mergepdfTool" class="hidden">
+<input type="file" id="mergeInput" multiple accept="application/pdf">
+<br>
+<button onclick="mergePDF()">Merge PDFs</button>
+</div>
+
+<!-- NEW TOOL: PDF SPLIT -->
+<div id="splitpdfTool" class="hidden">
+<input type="file" id="splitInput" accept="application/pdf">
+<input type="number" id="fromPage" placeholder="From Page">
+<input type="number" id="toPage" placeholder="To Page">
+<br>
+<button onclick="splitPDF()">Split PDF</button>
+</div>
+
 <button onclick="goBack()">Back</button>
 
 </div>
@@ -171,102 +194,167 @@ margin-top:20px;
 
 <script>
 const { jsPDF } = window.jspdf;
+const { PDFDocument } = PDFLib;
 
+/* LOGIN */
 function goNext(){
-var name=document.getElementById("username").value;
-
-if(name==""){
-document.getElementById("msg").innerHTML="Please enter your name";
-return;
+let name=document.getElementById("username").value.trim();
+if(name===""){msg.innerText="Please enter name";return;}
+page1.classList.add("hidden");
+page2.classList.remove("hidden");
+welcome.innerText="Hello "+name+" 👋";
 }
+function logout(){location.reload();}
 
-document.getElementById("page1").classList.add("hidden");
-document.getElementById("page2").classList.remove("hidden");
-document.getElementById("welcome").innerHTML="Hello "+name+" 👋";
-}
-
-function logout(){
-location.reload();
-}
-
+/* NAVIGATION */
 function openTool(tool){
-document.getElementById("page2").classList.add("hidden");
-document.getElementById("toolPage").classList.remove("hidden");
+page2.classList.add("hidden");
+toolPage.classList.remove("hidden");
 
-document.getElementById("resizeTool").classList.add("hidden");
-document.getElementById("textpdfTool").classList.add("hidden");
-document.getElementById("imagepdfTool").classList.add("hidden");
-
-if(tool=="resize"){
-document.getElementById("resizeTool").classList.remove("hidden");
-document.getElementById("toolTitle").innerHTML="Image Resize / Compress";
+document.querySelectorAll("#toolPage .card > div").forEach(d=>d.classList.add("hidden"));
+document.getElementById(tool+"Tool").classList.remove("hidden");
+toolTitle.innerText=document.querySelector("[onclick=\"openTool('"+tool+"')\"]").innerText;
 }
-
-if(tool=="textpdf"){
-document.getElementById("textpdfTool").classList.remove("hidden");
-document.getElementById("toolTitle").innerHTML="Text to PDF";
-}
-
-if(tool=="imagepdf"){
-document.getElementById("imagepdfTool").classList.remove("hidden");
-document.getElementById("toolTitle").innerHTML="Image to PDF";
-}
-}
-
 function goBack(){
-document.getElementById("toolPage").classList.add("hidden");
-document.getElementById("page2").classList.remove("hidden");
+toolPage.classList.add("hidden");
+page2.classList.remove("hidden");
 }
 
-/* IMAGE COMPRESS */
-function resizeImage(){
-var file=document.getElementById("imageInput").files[0];
-if(!file) return;
-
-var reader=new FileReader();
-reader.onload=function(e){
-var img=new Image();
-img.onload=function(){
-var canvas=document.getElementById("canvas");
-var ctx=canvas.getContext("2d");
-
-canvas.width=img.width/2;
-canvas.height=img.height/2;
-
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
-var link=document.getElementById("downloadLink");
-link.innerHTML="Download Image";
-link.href=canvas.toDataURL("image/jpeg",0.7);
-link.download="compressed.jpg";
-}
-img.src=e.target.result;
-}
-reader.readAsDataURL(file);
-}
-
-/* TEXT TO PDF */
-function generateTextPDF(){
-var text=document.getElementById("textData").value;
-var doc=new jsPDF();
+/* TEXT PDF */
+function generateSimplePDF(){
+let text=document.getElementById("simpleText").value;
+let doc=new jsPDF();
 doc.text(text,10,10);
 doc.save("text.pdf");
 }
 
-/* IMAGE TO PDF */
-function generateImagePDF(){
-var file=document.getElementById("imagePDFInput").files[0];
-if(!file) return;
+/* MULTI IMAGE PDF */
+async function generateMultiPDF(){
+let files=document.getElementById("multiImageInput").files;
+let doc=new jsPDF();
+for(let i=0;i<files.length;i++){
+let data=await readFile(files[i]);
+if(i>0)doc.addPage();
+doc.addImage(data,'JPEG',10,10,180,160);
+}
+doc.save("multiple.pdf");
+}
 
-var reader=new FileReader();
+/* CONVERT */
+function convertFile(){
+let file=document.getElementById("convertInput").files[0];
+let type=document.getElementById("convertType").value;
+if(!file)return;
+
+let reader=new FileReader();
 reader.onload=function(e){
-var doc=new jsPDF();
-doc.addImage(e.target.result,'JPEG',10,10,180,150);
-doc.save("image.pdf");
+if(type==="pdf"){
+let doc=new jsPDF();
+doc.addImage(e.target.result,'JPEG',10,10,180,160);
+doc.save("converted.pdf");
+}else{
+let img=new Image();
+img.onload=function(){
+let canvas=document.createElement("canvas");
+canvas.width=img.width;
+canvas.height=img.height;
+canvas.getContext("2d").drawImage(img,0,0);
+let link=document.createElement("a");
+link.href=canvas.toDataURL("image/"+type);
+link.download="converted."+type;
+link.click();
+}
+img.src=e.target.result;
+}
 }
 reader.readAsDataURL(file);
+}
+
+/* RESIZE */
+async function resizePhotos(){
+let files=document.getElementById("resizeInput").files;
+let percent=document.getElementById("resizePercent").value;
+for(let i=0;i<files.length;i++){
+let data=await readFile(files[i]);
+let img=new Image();
+img.src=data;
+await new Promise(res=>img.onload=res);
+let canvas=document.createElement("canvas");
+canvas.width=img.width*(percent/100);
+canvas.height=img.height*(percent/100);
+canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+let link=document.createElement("a");
+link.href=canvas.toDataURL("image/jpeg",0.8);
+link.download="resized_"+i+".jpg";
+link.click();
+}
+}
+
+/* PHOTO TO PDF */
+function photoToPDF(){
+let file=document.getElementById("singlePhoto").files[0];
+if(!file)return;
+let reader=new FileReader();
+reader.onload=function(e){
+let doc=new jsPDF();
+doc.addImage(e.target.result,'JPEG',10,10,180,160);
+doc.save("photo.pdf");
+}
+reader.readAsDataURL(file);
+}
+
+/* MERGE PDF */
+async function mergePDF(){
+let files=document.getElementById("mergeInput").files;
+if(!files.length)return;
+
+const mergedPdf = await PDFDocument.create();
+
+for (let file of files){
+const pdfBytes = await file.arrayBuffer();
+const pdf = await PDFDocument.load(pdfBytes);
+const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+copiedPages.forEach(page => mergedPdf.addPage(page));
+}
+
+const mergedBytes = await mergedPdf.save();
+downloadFile(mergedBytes,"merged.pdf");
+}
+
+/* SPLIT PDF */
+async function splitPDF(){
+let file=document.getElementById("splitInput").files[0];
+let from=parseInt(document.getElementById("fromPage").value)-1;
+let to=parseInt(document.getElementById("toPage").value)-1;
+
+const pdfBytes = await file.arrayBuffer();
+const pdfDoc = await PDFDocument.load(pdfBytes);
+const newPdf = await PDFDocument.create();
+
+const pages = await newPdf.copyPages(pdfDoc, pdfDoc.getPageIndices().slice(from,to+1));
+pages.forEach(p => newPdf.addPage(p));
+
+const newBytes = await newPdf.save();
+downloadFile(newBytes,"split.pdf");
+}
+
+/* HELPERS */
+function readFile(file){
+return new Promise(resolve=>{
+let reader=new FileReader();
+reader.onload=e=>resolve(e.target.result);
+reader.readAsDataURL(file);
+});
+}
+function downloadFile(bytes,name){
+let blob=new Blob([bytes],{type:"application/pdf"});
+let link=document.createElement("a");
+link.href=URL.createObjectURL(blob);
+link.download=name;
+link.click();
 }
 </script>
 
 </body>
 </html>
+
